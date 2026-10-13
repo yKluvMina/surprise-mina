@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#fff5f8">
+  <title>Pour Mina, mon amour ❤️</title>
+
+  <style>
+    :root {
+      --rose: #f4b8cc;
+      --rose-fonce: #d87093;
+      --rose-clair: #fff5f8;
+      --rose-tres-clair: #fff9fb;
+      --texte: #7a4a5c;
+      --blanc: #ffffff;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Georgia, "Times New Roman", serif;
+      color: var(--texte);
+      background:
+        radial-gradient(ellipse at top, #fffdfd, transparent 70%),
+        linear-gradient(135deg, #fff2f6, #fde4ec, #fae1ec);
+      text-align: center;
+      overflow-x: hidden;
+    }
+
+    button { font: inherit; cursor: pointer; border: none; -webkit-tap-highlight-color: transparent; }
+
+    .page {
+      display: none;
+      min-height: 100vh;
+      padding: 30px 18px 45px;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      animation: apparition .7s ease both;
+    }
+
+    .page.active { display: flex; }
+
+    .carte {
+      position: relative;
+      width: 100%;
+      max-width: 620px;
+      padding: 30px 22px;
+      background: rgba(255, 245, 248, 0.85);
+      border: 1px solid rgba(244, 184, 204, 0.6);
+      border-radius: 28px;
+      box-shadow: 0 15px 50px rgba(216, 112, 147, 0.12);
+      backdrop-filter: blur(10px);
+    }
+
+    .petit-titre {
+      color: var(--rose-fonce);
+      font-size: .78rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      font-size: clamp(1.8rem, 7vw, 2.6rem);
+      line-height: 1.15;
+      margin: 14px 0;
+      font-weight: normal;
+      color: var(--texte);
+    }
+
+    p { font-size: 1.05rem; line-height: 1.8; }
+
+    .coeur {
+      color: var(--rose-fonce);
+      font-size: 66px;
+      display: inline-block;
+      animation: battre 1.5s infinite;
+    }
+
+    .btn {
+      margin: 10px 4px;
+      padding: 14px 23px;
+      border-radius: 30px;
+      background: var(--rose-fonce);
+      color: white;
+      box-shadow: 0 6px 18px rgba(216, 112, 147, 0.25);
+      transition: transform .2s, background .2s;
+    }
+
+    .btn:hover { background: #c25b80; }
+    .btn:active { transform: scale(.97); }
+
+    .btn-secondaire { color: var(--rose-fonce); background: #fce8ef; box-shadow: none; }
+    .btn-secondaire:hover { background: #f7d7e3; }
+
+    .erreur { color: #b32950; min-height: 24px; font-size: .95rem; margin-top: 10px; }
+
+    /* Pavé numérique */
+    .pave-container { max-width: 320px; margin: 20px auto; }
+    .indicateurs-code { display: flex; justify-content: center; gap: 12px; margin-bottom: 25px; }
+    .cercle-chiffre {
+      width: 50px; height: 50px;
+      background: rgba(255, 255, 255, 0.9);
+      border: 1.5px solid #f4b8cc;
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; color: var(--rose-fonce);
+      box-shadow: 0 4px 10px rgba(216, 112, 147, 0.08);
+      transition: all 0.2s ease;
+    }
+    .cercle-chiffre.rempli { background: #fce8ef; border-color: var(--rose-fonce); }
+    .grille-clavier { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    .touche-clavier {
+      background: rgba(255, 255, 255, 0.95);
+      border: 1px solid #f4b8cc;
+      border-radius: 18px;
+      height: 60px; font-size: 1.4rem; color: var(--rose-fonce);
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 12px rgba(216, 112, 147, 0.06);
+      transition: all 0.15s ease;
+    }
+    .touche-clavier:hover { background: #fff5f8; }
+    .touche-clavier:active { transform: scale(0.93); background: #fce8ef; }
+    .touche-clavier.touche-coeur { background: #fce8ef; font-size: 1.2rem; }
+
+    .petits-coeurs { position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: -1; }
+    .coeur-flottant { position: absolute; bottom: -35px; opacity: .55; animation: monter linear forwards; }
+
+    /* Style 3 cadeaux */
+    .cadeaux { display: flex; justify-content: space-around; align-items: center; gap: 15px; margin: 30px 0; }
+    .cadeau-btn { background: none; display: flex; flex-direction: column; align-items: center; transition: transform 0.3s ease; padding: 0; }
+    .cadeau-btn:hover { transform: translateY(-8px) scale(1.05); }
+    .cadeau-btn:active { transform: scale(0.95); }
+    .cadeau-img { width: 100px; height: 100px; object-fit: contain; filter: drop-shadow(0 8px 15px rgba(216, 112, 147, 0.25)); }
+    .cadeau-label { margin-top: 10px; font-size: 0.95rem; color: var(--texte); font-weight: 500; }
+
+    /* Page Lilas */
+    .fleurs-disposition { display: grid; grid-template-columns: 1fr 1.4fr 1fr; align-items: center; gap: 12px; margin: 20px 0; }
+    .colonne-mots { display: flex; flex-direction: column; gap: 14px; }
+    .bulle-mots {
+      background: #ffffff; border: 1px solid #f4b8cc; border-radius: 20px; padding: 10px 12px;
+      font-size: 0.85rem; color: #8c4a63; font-style: italic; box-shadow: 0 4px 12px rgba(216, 112, 147, 0.08); line-height: 1.4;
+    }
+    .cadre-lys {
+      background: #fff0f5; border: 2px dashed #f4b8cc; border-radius: 30px; padding: 15px 10px;
+      box-shadow: inset 0 0 15px rgba(244, 184, 204, 0.3); display: flex; justify-content: center; align-items: center;
+    }
+    .img-lilas-perso { width: 100%; max-width: 180px; height: auto; object-fit: contain; mix-blend-mode: multiply; filter: drop-shadow(0 6px 12px rgba(216, 112, 147, 0.2)); }
+
+    /* STYLES CADEAU 2 : SPOTIFY A GAUCHE, VINYL AU MILIEU, TEXTE A DROITE */
+    .playlist-container {
+      position: relative;
+      width: 100%;
+      min-height: 280px;
+      margin: 20px 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .playlist-card {
+      position: absolute;
+      top: -15px;
+      left: -8px;
+      width: 175px;
+      background: #181818;
+      border-radius: 16px;
+      padding: 10px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+      color: #ffffff;
+      text-align: left;
+      z-index: 3;
+    }
+
+    .playlist-cover {
+      width: 100%;
+      height: 90px;
+      background: linear-gradient(135deg, #f48fb1, #d87093);
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      text-align: center;
+      padding: 6px;
+    }
+
+    .playlist-cover h3 { margin: 0; font-size: 1.3rem; font-family: 'Arial Black', sans-serif; letter-spacing: 2px; }
+    .playlist-cover p { margin: 2px 0 0; font-size: 0.55rem; letter-spacing: 1px; opacity: 0.9; }
+
+    .player-info { margin-top: 4px; }
+    .player-title { font-size: 0.75rem; font-weight: bold; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .player-artist { font-size: 0.6rem; color: #b3b3b3; margin: 1px 0 3px; }
+
+    .progress-bar-container { width: 100%; height: 4px; background: #404040; border-radius: 2px; margin-bottom: 3px; cursor: pointer; }
+    .progress-bar { width: 0%; height: 100%; background: #f48fb1; border-radius: 2px; transition: width 0.1s linear; }
+    .time-indicators { display: flex; justify-content: space-between; font-size: 0.5rem; color: #b3b3b3; margin-bottom: 4px; }
+
+    .player-controls { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+    .control-btn { background: none; border: none; color: #b3b3b3; font-size: 0.75rem; cursor: pointer; transition: color 0.2s, transform 0.2s; padding: 0; }
+    .control-btn:hover { color: #ffffff; transform: scale(1.1); }
+
+    .play-btn {
+      width: 26px; height: 26px; background: #ffffff; border-radius: 50%; color: #000000;
+      display: flex; align-items: center; justify-content: center; font-size: 0.65rem;
+    }
+    .play-btn:hover { transform: scale(1.08); background: #fce8ef; color: #d87093; }
+
+    /* Barre de volume intégrée */
+    .volume-container {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      border-top: 1px solid #282828;
+      padding-top: 6px;
+    }
+    .volume-icon { font-size: 0.7rem; color: #b3b3b3; }
+    .volume-slider {
+      width: 100%;
+      height: 3px;
+      -webkit-appearance: none;
+      background: #404040;
+      border-radius: 2px;
+      outline: none;
+      cursor: pointer;
+    }
+    .volume-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #ffffff;
+      cursor: pointer;
+      transition: transform 0.1s;
+    }
+    .volume-slider::-webkit-slider-thumb:hover { transform: scale(1.3); }
+
+    /* Vinyl parfaitement centré au milieu de la carte */
+    .vinyl-container {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 2;
+    }
+
+    .vinyl {
+      width: 175px; height: 175px; border-radius: 50%;
+      background: radial-gradient(circle, #222 0%, #111 25%, #2a2a2a 26%, #111 35%, #222 50%, #111 65%, #050505 100%);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+      display: flex; align-items: center; justify-content: center;
+      animation: tourner 4s linear infinite;
+      animation-play-state: paused;
+    }
+
+    .vinyl.tourne { animation-play-state: running; }
+    .vinyl-center { width: 60px; height: 60px; background: #f48fb1; border-radius: 50%; border: 3px solid #ffffff; display: flex; align-items: center; justify-content: center; }
+    .vinyl-hole { width: 12px; height: 12px; background: #ffffff; border-radius: 50%; }
+
+    /* Zone pour le texte à droite : hauteur 225px et taille de texte 0.78rem */
+    .texte-mignon-droite {
+      position: absolute;
+      right: -8px;
+      top: -15px;
+      width: 175px;
+      height: 225px;
+      background: rgba(255, 255, 255, 0.85);
+      border: 1px solid #f4b8cc;
+      border-radius: 16px;
+      padding: 10px 12px;
+      font-size: 0.78rem;
+      color: #7a4a5c;
+      font-style: italic;
+      line-height: 1.45;
+      text-align: left;
+      z-index: 3;
+      box-shadow: 0 4px 12px rgba(216, 112, 147, 0.08);
+      display: flex;
+      align-items: center;
+    }
+
+    /* Petits cœurs décoratifs dans les coins inférieurs */
+    .coeur-coin {
+      position: absolute;
+      bottom: 12px;
+      font-size: 1.3rem;
+      color: var(--rose-fonce);
+      opacity: 0.7;
+      user-select: none;
+      animation: battre 2s infinite ease-in-out;
+    }
+    .coeur-coin-gauche { left: 18px; }
+    .coeur-coin-droit { right: 18px; animation-delay: 1s; }
+
+    .message-final {
+      font-size: 1.05rem;
+      line-height: 1.7;
+      padding: 10px 0;
+      text-align: left;
+      max-height: 350px;
+      overflow-y: auto;
+      padding-right: 10px;
+    }
+    footer { font-size: .8rem; opacity: .65; margin-top: 24px; }
+
+    @keyframes battre { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.13); } }
+    @keyframes apparition { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes monter { to { transform: translateY(-115vh) rotate(25deg); opacity: 0; } }
+    @keyframes tourner { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+    @media (max-width: 580px) {
+      .playlist-container { display: flex; flex-direction: column; align-items: center; gap: 15px; min-height: auto; }
+      .playlist-card, .vinyl-container, .texte-mignon-droite { position: relative; top: 0; left: 0; right: 0; bottom: 0; transform: none; width: 100%; max-width: 220px; height: auto; }
+      .vinyl { width: 160px; height: 160px; }
+      .fleurs-disposition { grid-template-columns: 1fr; gap: 15px; }
+      .colonne-mots { flex-direction: row; flex-wrap: wrap; justify-content: center; }
+      .bulle-mots { flex: 1 1 40%; font-size: 0.8rem; }
+      .cadre-lys { order: -1; }
+      .cadeau-img { width: 80px; height: 80px; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="petits-coeurs" id="fond" aria-hidden="true"></div>
+
+  <!-- LECTEUR AUDIO MP3 -->
+  <audio id="audio-player" preload="auto"></audio>
+
+  <main>
+    <!-- PAGE 1 : ACCUEIL -->
+    <section class="page active" id="accueil">
+      <div class="carte">
+        <div class="coeur">♥</div>
+        <div class="petit-titre">Un petit secret pour toi</div>
+        <h1>Pour toi, Mina</h1>
+        <p>J'ai préparé quelque chose rien que pour toi, mon amour de ma vie. 💗</p>
+        <p>Mais avant de découvrir tes surprises…</p>
+        <button class="btn" onclick="allerA('code')">Ouvrir mon petit secret 💌</button>
+        <footer>Fait avec tout mon amour ❤️</footer>
+      </div>
+    </section>
+
+    <!-- PAGE 2 : CODE SECRET -->
+    <section class="page" id="code">
+      <div class="carte">
+        <div class="coeur">♡</div>
+        <div class="petit-titre">Notre petit secret</div>
+        <h1>Entre notre code secret</h1>
+        <p>Entre la date de notre rencontre (4 chiffres)…</p>
+
+        <div class="pave-container">
+          <div class="indicateurs-code">
+            <div class="cercle-chiffre" id="dot-0">♡</div>
+            <div class="cercle-chiffre" id="dot-1">♡</div>
+            <div class="cercle-chiffre" id="dot-2">♡</div>
+            <div class="cercle-chiffre" id="dot-3">♡</div>
+          </div>
+
+          <div class="grille-clavier">
+            <button class="touche-clavier" onclick="ajouterChiffre('1')">1</button>
+            <button class="touche-clavier" onclick="ajouterChiffre('2')">2</button>
+            <button class="touche-clavier" onclick="ajouterChiffre('3')">3</button>
+            <button class="touche-clavier" onclick="ajouterChiffre('4')">4</button>
+            <button class="touche-clavier" onclick="ajouterChiffre('5')">5</button>
+            <button class="touche-clavier" onclick="ajouterChiffre('6')">6</button>
+            <button class="touche-clavier" onclick="ajouterChiffre('7')">7</button>
+            <button class="touche-clavier" onclick="ajouterChiffre('8')">8</button>
+            <button class="touche-clavier" onclick="ajouterChiffre('9')">9</button>
+            <button class="touche-clavier touche-coeur" onclick="effacerDernier()">⌫</button>
+            <button class="touche-clavier" onclick="ajouterChiffre('0')">0</button>
+            <button class="touche-clavier touche-coeur" onclick="validerCodeDirect()">♥</button>
+          </div>
+        </div>
+
+        <div class="erreur" id="erreur" aria-live="polite"></div>
+        <button class="btn btn-secondaire" onclick="allerA('accueil')" style="margin-top: 15px;">Retour</button>
+      </div>
+    </section>
+
+    <!-- PAGE 3 : MENU DES CADEAUX -->
+    <section class="page" id="cadeaux">
+      <div class="carte">
+        <div class="petit-titre">Juste pour toi</div>
+        <h1>Bravo mon coeur t'a debloqué t'es cadeau</h1>
+        <p style="margin-bottom: 5px;">t'es cadeau t'attendent💕</p>
+
+        <div class="cadeaux">
+          <button class="cadeau-btn" onclick="allerA('lys')">
+            <svg class="cadeau-img" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+              <rect x="20" y="45" width="60" height="45" rx="6" fill="#a4d4ae" />
+              <rect x="15" y="35" width="70" height="12" rx="4" fill="#8ec69b" />
+              <rect x="46" y="35" width="8" height="55" fill="#f8b3c8" />
+              <rect x="20" y="60" width="60" height="8" fill="#f8b3c8" />
+              <path d="M 50,35 C 35,15 20,30 50,35 C 80,30 65,15 50,35 Z" fill="#f48fb1" />
+              <path d="M 50,35 C 40,20 30,25 50,35 Z" fill="#f06292" />
+            </svg>
+            <span class="cadeau-label">Cadeau n° 1</span>
+          </button>
+
+          <button class="cadeau-btn" onclick="allerA('lettre')">
+            <svg class="cadeau-img" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+              <rect x="20" y="45" width="60" height="45" rx="6" fill="#a4d4ae" />
+              <rect x="15" y="35" width="70" height="12" rx="4" fill="#8ec69b" />
+              <rect x="46" y="35" width="8" height="55" fill="#f8b3c8" />
+              <rect x="20" y="60" width="60" height="8" fill="#f8b3c8" />
+              <path d="M 50,35 C 35,15 20,30 50,35 C 80,30 65,15 50,35 Z" fill="#f48fb1" />
+              <path d="M 50,35 C 40,20 30,25 50,35 Z" fill="#f06292" />
+            </svg>
+            <span class="cadeau-label">Cadeau n° 2</span>
+          </button>
+
+          <button class="cadeau-btn" onclick="allerA('final')">
+            <svg class="cadeau-img" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+              <rect x="20" y="45" width="60" height="45" rx="6" fill="#a4d4ae" />
+              <rect x="15" y="35" width="70" height="12" rx="4" fill="#8ec69b" />
+              <rect x="46" y="35" width="8" height="55" fill="#f8b3c8" />
+              <rect x="20" y="60" width="60" height="8" fill="#f8b3c8" />
+              <path d="M 50,35 C 35,15 20,30 50,35 C 80,30 65,15 50,35 Z" fill="#f48fb1" />
+              <path d="M 50,35 C 40,20 30,25 50,35 Z" fill="#f06292" />
+            </svg>
+            <span class="cadeau-label">Cadeau n° 3</span>
+          </button>
+        </div>
+
+        <p style="font-size: 0.95rem; color: #8c5267;">Peu importe le cadeau que tu ouvres, rappelle-toi que je t'aime. ❤️</p>
+      </div>
+    </section>
+
+    <!-- CADEAU 1 : LILAS -->
+    <section class="page" id="lys">
+      <div class="carte" style="max-width: 600px;">
+        <div class="petit-titre">Cadeau numéro un</div>
+        <h1>Tes fleurs préférées 🤍</h1>
+
+        <div class="fleurs-disposition">
+          <div class="colonne-mots">
+            <div class="bulle-mots">t'es l'amour de ma vie 🌸</div>
+            <div class="bulle-mots">ta fais chavirer mon coeur 💗</div>
+            <div class="bulle-mots">merci de m'aimer ✨</div>
+          </div>
+
+          <div class="cadre-lys">
+            <img src="lilies.png" alt="Mon bouquet de lilas" class="img-lilas-perso">
+          </div>
+
+          <div class="colonne-mots">
+            <div class="bulle-mots">Seni tüm kalbimle seviyorum 💍</div>
+            <div class="bulle-mots">Sen hayatımın kadınısın 🌱</div>
+            <div class="bulle-mots">Seni sonsuza kadar seviyorum askim❤️</div>
+          </div>
+        </div>
+
+        <button class="btn" onclick="allerA('cadeaux')">Retour aux cadeaux 🎁</button>
+      </div>
+    </section>
+
+    <!-- CADEAU 2 : PLAYLIST MULTI-MUSIQUES + DISQUE VINYLE CENTRÉ -->
+    <section class="page" id="lettre">
+      <div class="carte">
+        <div class="petit-titre">Cadeau numéro deux</div>
+        <h1 style="font-size: 1.8rem; margin-bottom: 2px;">une mini playlist pour l'amour de ma vie</h1>
+        <p style="font-style: italic; font-size: 0.9rem; margin-top: 0; margin-bottom: 10px; color: #8c4a63;">
+          il a deux musique car je sais que tu l'ai aime de sur✨
+        </p>
+
+        <div class="playlist-container">
+          <!-- Lecteur Spotify en haut à gauche -->
+          <div class="playlist-card">
+            <div class="playlist-cover">
+              <h3 id="cover-title">M.</h3>
+              <p>MINA & KELLIAN</p>
+            </div>
+            <div class="player-info">
+              <p class="player-title" id="song-title">M.</p>
+              <p class="player-artist" id="song-artist">Anıl Emre Daldal</p>
+            </div>
+
+            <div class="progress-bar-container" onclick="seekTrack(event)">
+              <div class="progress-bar" id="progress-bar"></div>
+            </div>
+            <div class="time-indicators">
+              <span id="current-time">0:00</span>
+              <span id="total-duration">--:--</span>
+            </div>
+
+            <div class="player-controls">
+              <button class="control-btn">🔀</button>
+              <button class="control-btn" onclick="prevTrack()">⏮</button>
+              <button class="control-btn play-btn" id="btn-play-pause" onclick="togglePlayMusic()">▶</button>
+              <button class="control-btn" onclick="nextTrack()">⏭</button>
+              <button class="control-btn" id="btn-heart" onclick="toggleHeart(this)" style="color:#f48fb1;">♥</button>
+            </div>
+
+            <!-- Barre de son / volume -->
+            <div class="volume-container">
+              <span class="volume-icon" id="volume-icon">🔊</span>
+              <input type="range" min="0" max="1" step="0.01" value="0.7" class="volume-slider" id="volume-slider" oninput="changerVolume(this.value)">
+            </div>
+          </div>
+
+          <!-- Disque vinyle parfaitement centré au milieu -->
+          <div class="vinyl-container">
+            <div class="vinyl" id="vinyl-disc">
+              <div class="vinyl-center">
+                <div class="vinyl-hole"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Zone réservée pour le texte à droite -->
+          <div class="texte-mignon-droite">
+            coucou mon coeur j'ai mis deux petites musiques uniquement car je sais que tu les adores par cœur ! J'espère de tout mon cœur que tu vas aimer tes petites surprises préparées avec tant d'amour. J'attends ton retour avec une immense impatience, mon bébé d'amour... 💕✨
+          </div>
+        </div>
+
+        <!-- Petits cœurs décoratifs dans les coins inférieurs -->
+        <span class="coeur-coin coeur-coin-gauche">💗</span>
+        <span class="coeur-coin coeur-coin-droit">💕</span>
+
+        <button class="btn" onclick="allerA('cadeaux')">Retour aux cadeaux 🎁</button>
+      </div>
+    </section>
+
+    <!-- CADEAU 3 : MESSAGE FINAL -->
+    <section class="page" id="final">
+      <div class="carte">
+        <div class="petit-titre">Cadeau numéro trois</div>
+        <div class="coeur">♥</div>
+        <h1>Mon plus beau cadeau, c'est toi</h1>
+
+        <div class="message-final">
+          <p>
+            coucou mon coeur je te fais ce texte que tu liras dans le 3 eme cadeau de ta surprise je te fais cette surprise pour te rappeler a quel point je t’aime dans cette periode difficile ca fais quelque jours que je suis dessus et j’essaye de tous faire en sorte que ce soit parfait ton 3 eme cadeau est donc un texte et j’espere en tous cas que les 2 autre cadeau t’auront plus j’aimerait te dire a quel point je t’aime fort et a quel point tu compte pour moi tu es l’amour de ma vie et sans aucun doute c’est dure en ce moment mais on se bas dans ces moment difficile et je suis sur que on y arrivera sache que je t’aime et que t’es la meilleure chose qui me soit arrive merci pour tous mina t’es une personne extraordinaire malgres tous et sache que je t’aime de tous mon coeur je te fais ce message avec mon coeur donc j’espere qu’il touchera le tiens car il sont lier je pense que on est des ame soeur rellement nos ame se sont rejoins et je le sent j’ai ce liens avec personne d’autre et je l’ai jamais eu malgres tous ce qui se passe mes sentiments ne bouge pas t’es parfaite t’es si belle et si jolie et j’espere que tu te rend compte a quel point tu compte pour moi on a encore beaucoup de chose a regler et a apprendre mais je suis sur malgres tous que on y arrivera je t’aime plus que tous et j’arrive pas sans toi en ce moment je suis loin de toi et je me rend compte d’a quel point tu compte pour moi merci a toi j’ai extremement besoin de toi a mes coter car j’arrive pas a vivre sans toi alors voila j’espere que en lisant ce texte sa te fera tomber amoureuse plus que tu l’ai deja oui mina je t’aime fort et tu le sais deja je pense que malgres tous nous somme lier et sa pour l’eternite j’espere que tu ressent toujours autant d’amour que le debut et que tu est toujours aussi amoureuse de moi autant que moi je le suis pour toi je tiens a te remercier pour tous ce que tu fais et les effort que tu fais pour alimenter la bonne entente de notre relation felicitation a nous deux j’espere que on continuera a aimer l’un et l’autre a en mourir et que on pourra continuer nos effort pour que tous fonctionne correctement je sais que on y arrivera je crois en nous depuis que t’es arrive dans ma vie t’a tous changer ta apporter un truc que j’avais jamais ressenti auparavant un bonheur sincere et profond un sentiment que j’arrive meme pas a expliquer chaque jour je pense a toi ton rire ta voix ta facon d’etre tous chez toi me rend fou t’es pas juste une fille comme sa pour moi t’es unique t’es special tu est ma plus belle pensée je veux jamais que sa se termine tu es l’amour de ma vie mina je t’aime OUI je t’aime vraiment de tous mon coeur tous de moi me supplie de t’avoir dans mes bras et le jour ou je le pourrait je ne m’arreterait pas de te serrer contre moi je tiens a m’excuser de toute les chose que j’ai pu dire qu’il n’etait pas bien ou qu’il ton blesser je veux le meilleure pour toi et j’espere que tu le sais je t’aime de tous mon coeur mina et encore une fois mille merci pour ta patience car je sais que je suis pas facile a aimer parfois je t’aime super fort ma femme a tres vite ❤️
+          </p>
+        </div>
+
+        <button class="btn" onclick="allerA('cadeaux')">Revoir mes cadeaux 💝</button>
+        <button class="btn btn-secondaire" onclick="allerA('accueil')">Revenir au debut</button>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const CODE_SECRET = "2002";
+
+    // LISTE DE VOS MUSIQUES LOCALES
+    const playlist = [
+      {
+        titre: "M.",
+        artiste: "Anıl Emre Daldal",
+        coverText: "M+K",
+        fichier: "music.mp3"
+      },
+      {
+        titre: "Belki",
+        artiste: "Artiste 2",
+        coverText: "M+K",
+        fichier: "music2.mp3"
+      }
+    ];
+
+    let musiqueIndex = 0;
+    let codeSaisi = "";
+    let debloque = false;
+
+    const audio = document.getElementById("audio-player");
+    const vinyl = document.getElementById("vinyl-disc");
+    const playBtn = document.getElementById("btn-play-pause");
+    const volumeSlider = document.getElementById("volume-slider");
+    const volumeIcon = document.getElementById("volume-icon");
+
+    // Volume initial par défaut (réglé à 70% pour éviter que ce soit trop fort)
+    audio.volume = 0.7;
+
+    function changerVolume(valeur) {
+      audio.volume = valeur;
+      if (valeur == 0) {
+        volumeIcon.textContent = "🔇";
+      } else if (valeur < 0.4) {
+        volumeIcon.textContent = "🔈";
+      } else {
+        volumeIcon.textContent = "🔊";
+      }
+    }
+
+    // Initialisation première chanson
+    chargerMusique(musiqueIndex);
+
+    function chargerMusique(index) {
+      const piste = playlist[index];
+      audio.src = piste.fichier;
+      document.getElementById("song-title").textContent = piste.titre;
+      document.getElementById("song-artist").textContent = piste.artiste;
+      document.getElementById("cover-title").textContent = piste.coverText;
+      document.getElementById("progress-bar").style.width = "0%";
+      document.getElementById("current-time").textContent = "0:00";
+    }
+
+    audio.addEventListener("loadedmetadata", () => {
+      document.getElementById("total-duration").textContent = formaterTemps(audio.duration);
+    });
+
+    audio.addEventListener("timeupdate", () => {
+      if (audio.duration) {
+        const percent = (audio.currentTime / audio.duration) * 100;
+        document.getElementById("progress-bar").style.width = percent + "%";
+        document.getElementById("current-time").textContent = formaterTemps(audio.currentTime);
+      }
+    });
+
+    // Passage automatique à la musique suivante à la fin du morceau
+    audio.addEventListener("ended", () => {
+      nextTrack();
+    });
+
+    audio.addEventListener("play", () => {
+      playBtn.textContent = "❚❚";
+      vinyl.classList.add("tourne");
+    });
+
+    audio.addEventListener("pause", () => {
+      playBtn.textContent = "▶";
+      vinyl.classList.remove("tourne");
+    });
+
+    function togglePlayMusic() {
+      if (audio.paused) {
+        audio.play().catch(e => console.log("Lecture bloquée :", e));
+      } else {
+        audio.pause();
+      }
+    }
+
+    function prevTrack() {
+      if (audio.currentTime > 3) {
+        audio.currentTime = 0;
+      } else {
+        musiqueIndex = (musiqueIndex - 1 + playlist.length) % playlist.length;
+        chargerMusique(musiqueIndex);
+        audio.play().catch(e => console.log(e));
+      }
+    }
+
+    function nextTrack() {
+      musiqueIndex = (musiqueIndex + 1) % playlist.length;
+      chargerMusique(musiqueIndex);
+      audio.play().catch(e => console.log(e));
+    }
+
+    function toggleHeart(btn) {
+      btn.style.color = (btn.style.color === 'rgb(244, 143, 177)') ? '#ffffff' : '#f48fb1';
+    }
+
+    function formaterTemps(secondes) {
+      if (isNaN(secondes)) return "0:00";
+      const min = Math.floor(secondes / 60);
+      const sec = Math.floor(secondes % 60);
+      return `${min}:${sec < 10 ? '0' : ''}${sec}`;
+    }
+
+    function seekTrack(event) {
+      const rect = event.currentTarget.getBoundingClientRect();
+      const clickX = event.clientX - rect.left;
+      if (audio.duration) {
+        audio.currentTime = (clickX / rect.width) * audio.duration;
+      }
+    }
+
+    function allerA(id) {
+      const pagesProtegees = ["cadeaux", "lys", "lettre", "final"];
+
+      if (pagesProtegees.includes(id) && !debloque) {
+        id = "code";
+      }
+
+      document.querySelectorAll(".page").forEach(page => {
+        page.classList.remove("active");
+      });
+
+      document.getElementById(id).classList.add("active");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function ajouterChiffre(chiffre) {
+      if (codeSaisi.length < 4) {
+        codeSaisi += chiffre;
+        mettreAJourIndicateurs();
+        if (codeSaisi.length === 4) {
+          setTimeout(verifierCodeClavier, 200);
+        }
+      }
+    }
+
+    function effacerDernier() {
+      if (codeSaisi.length > 0) {
+        codeSaisi = codeSaisi.slice(0, -1);
+        mettreAJourIndicateurs();
+        document.getElementById("erreur").textContent = "";
+      }
+    }
+
+    function mettreAJourIndicateurs() {
+      for (let i = 0; i < 4; i++) {
+        const dot = document.getElementById(`dot-${i}`);
+        if (i < codeSaisi.length) {
+          dot.textContent = "♥";
+          dot.classList.add("rempli");
+        } else {
+          dot.textContent = "♡";
+          dot.classList.remove("rempli");
+        }
+      }
+    }
+
+    function validerCodeDirect() {
+      if (codeSaisi.length === 4) {
+        verifierCodeClavier();
+      } else {
+        document.getElementById("erreur").textContent = "Entre les 4 chiffres de notre date, mon cœur 💗";
+      }
+    }
+
+    function verifierCodeClavier() {
+      const erreur = document.getElementById("erreur");
+
+      if (codeSaisi === CODE_SECRET) {
+        debloque = true;
+        erreur.textContent = "";
+        lancerConfettis();
+        allerA("cadeaux");
+      } else {
+        erreur.textContent = "Oups, ce n'est pas la bonne date... Réessaie 💗";
+        setTimeout(() => {
+          codeSaisi = "";
+          mettreAJourIndicateurs();
+        }, 800);
+      }
+    }
+
+    function lancerConfettis() {
+      for (let i = 0; i < 18; i++) {
+        const coeur = document.createElement("span");
+        coeur.className = "coeur-flottant";
+        coeur.textContent = ["♥", "♡", "💕", "💗"][i % 4];
+        coeur.style.left = Math.random() * 100 + "vw";
+        coeur.style.fontSize = (14 + Math.random() * 20) + "px";
+        coeur.style.animationDuration = (3 + Math.random() * 4) + "s";
+        document.getElementById("fond").appendChild(coeur);
+        setTimeout(() => coeur.remove(), 7500);
+      }
+    }
+
+    function coeurAleatoire() {
+      const coeur = document.createElement("span");
+      coeur.className = "coeur-flottant";
+      coeur.textContent = Math.random() > 0.5 ? "♡" : "♥";
+      coeur.style.left = Math.random() * 100 + "vw";
+      coeur.style.fontSize = (12 + Math.random() * 15) + "px";
+      coeur.style.animationDuration = (7 + Math.random() * 6) + "s";
+      document.getElementById("fond").appendChild(coeur);
+      setTimeout(() => coeur.remove(), 14000);
+    }
+
+    setInterval(coeurAleatoire, 1100);
+  </script>
+</body>
+</html>
